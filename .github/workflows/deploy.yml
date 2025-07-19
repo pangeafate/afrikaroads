@@ -1,0 +1,71 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        npm install -g html-minifier-terser
+        npm install -g clean-css-cli
+        npm install -g terser
+        
+    - name: Create optimized build
+      run: |
+        # Create build directory
+        mkdir -p build
+        
+        # Copy and optimize HTML
+        html-minifier-terser --input-dir . --output-dir build \
+          --file-ext html \
+          --remove-comments \
+          --remove-optional-tags \
+          --remove-redundant-attributes \
+          --remove-script-type-attributes \
+          --remove-tag-whitespace \
+          --use-short-doctype \
+          --collapse-whitespace \
+          --minify-css true \
+          --minify-js true
+        
+        # Copy and optimize CSS
+        mkdir -p build/css
+        cleancss -o build/css/main.min.css css/main.css css/animations.css css/responsive.css
+        
+        # Copy and optimize JS
+        mkdir -p build/js
+        terser js/utils.js js/animations.js js/main.js -o build/js/main.min.js --compress --mangle
+        
+        # Copy other assets
+        cp -r images build/ 2>/dev/null || echo "No images directory found"
+        cp -r assets build/ 2>/dev/null || echo "No assets directory found"
+        
+        # Update HTML to use minified files
+        sed -i 's|css/main.css|css/main.min.css|g' build/index.html
+        sed -i 's|css/animations.css||g' build/index.html
+        sed -i 's|css/responsive.css||g' build/index.html
+        sed -i 's|js/utils.js|js/main.min.js|g' build/index.html
+        sed -i 's|js/animations.js||g' build/index.html
+        sed -i 's|js/main.js||g' build/index.html
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build

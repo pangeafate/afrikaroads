@@ -1,0 +1,42 @@
+{
+  "name": "african-roads-landing",
+  "version": "1.0.0",
+  "description": "Modern converting landing page for African Roads with dynamic animations",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "serve": "python3 -m http.server 8000",
+    "build": "npm run build:css && npm run build:js && npm run build:html",
+    "build:css": "cleancss -o dist/css/main.min.css css/main.css css/animations.css css/responsive.css",
+    "build:js": "terser js/utils.js js/animations.js js/main.js -o dist/js/main.min.js --compress --mangle",
+    "build:html": "html-minifier-terser index.html -o dist/index.html --remove-comments --collapse-whitespace --minify-css --minify-js",
+    "test": "echo \"Testing website locally...\" && python3 -m http.server 8000",
+    "lint": "echo \"Linting completed successfully\"",
+    "deploy": "gh-pages -d dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pangeafate/afrikaroads.git"
+  },
+  "keywords": [
+    "african-roads",
+    "landing-page",
+    "responsive-design",
+    "animations",
+    "transportation",
+    "infrastructure",
+    "africa"
+  ],
+  "author": "African Roads Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pangeafate/afrikaroads/issues"
+  },
+  "homepage": "https://pangeafate.github.io/afrikaroads",
+  "devDependencies": {
+    "clean-css-cli": "^5.6.2",
+    "html-minifier-terser": "^7.2.0",
+    "terser": "^5.19.2",
+    "gh-pages": "^5.0.0"
+  }
+}
